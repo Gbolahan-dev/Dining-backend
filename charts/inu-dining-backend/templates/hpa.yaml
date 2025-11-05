@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "Dining-backend.fullname" . }}
+  name: {{ include "dining-backend.fullname" . }}
   labels:
-    {{- include "Dining-backend.labels" . | nindent 4 }}
+    {{- include "dining-backend.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "Dining-backend.fullname" . }}
+    name: {{ include "dining-backend.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:
