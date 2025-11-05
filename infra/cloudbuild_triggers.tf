@@ -6,13 +6,15 @@ resource "google_cloudbuildv2_connection" "github_connection" {
   name     = "github-connection"
 
   # only set on first apply; ignore drift later
-  dynamic "github_config" {
-    for_each = var.github_app_installation_id == null ? [] : [1]
-    content { app_installation_id = var.github_app_installation_id }
+  github_config {
+     app_installation_id = var.github_app_installation_id 
+     
+     authorizer_credential {
+      oauth_token_secret_version = "projects/${var.project_id}/secrets/github-oauth-token/versions/latest"
+    }  
   }
 
   depends_on = [google_project_service.apis]
-  lifecycle { ignore_changes = [github_config] }
 }
 
 resource "google_cloudbuildv2_repository" "github_repo" {
