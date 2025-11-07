@@ -26,9 +26,9 @@ resource "helm_release" "staging" {
     yamlencode({
       ingress = {
         enabled = true
+        className = "gce"
         annotations = {
           "ingress.gcp.kubernetes.io/pre-shared-cert" = google_compute_managed_ssl_certificate.staging_cert.name
-          "kubernetes.io/ingress.class" = "gce"
         }
         hosts = [
           {
@@ -75,9 +75,9 @@ resource "helm_release" "production" {
     yamlencode({
       ingress = {
         enabled = true
+        className = "gce"
         annotations = {
           "ingress.gcp.kubernetes.io/pre-shared-cert" = google_compute_managed_ssl_certificate.prod_cert.name
-          "kubernetes.io/ingress.class" = "gce"
         }
         hosts = [
           {
