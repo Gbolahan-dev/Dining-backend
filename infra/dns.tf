@@ -36,3 +36,4 @@ curl "https://www.duckdns.org/update?domains=inu-dining-api&token=${self.trigger
 curl "https://www.duckdns.org/update?domains=api-prod&token=${self.triggers.token}&ip=${self.triggers.prod_ip}"
 EOF
   }
+}
