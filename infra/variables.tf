@@ -67,7 +67,25 @@ variable "cb_runner_sa_email" {
   default     = "dining-backend-cb-sa@digital-shadow-472610-a9.iam.gserviceaccount.com"
 }
 
+# Add to the end of infra/variables.tf
 
+variable "staging_hostname" {
+  description = "The hostname for the staging environment"
+  type        = string
+  default     = "inu-dining-api.duckdns.org"
+}
+
+variable "prod_hostname" {
+  description = "The hostname for the production environment"
+  type        = string
+  default     = "api-prod.inu-dining-app.tk"
+}
+
+variable "duckdns_token_secret_id" {
+  description = "Secret Manager secret ID for DuckDNS token"
+  type        = string
+  default     = "duckdns-token"
+}
 
 
 

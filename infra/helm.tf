@@ -1,13 +1,12 @@
-# helm.tf
 resource "helm_release" "staging" {
   name             = "inu-dining-staging"
-  chart            = "../charts/inu-dining-backend" # Path to new chart
+  chart            = "../charts/inu-dining-backend"
   namespace        = kubernetes_namespace.staging.metadata[0].name
   create_namespace = false
-  atomic          = true           # auto-rollback on failure
-  cleanup_on_fail = true           # remove broken release so name isn’t “stuck”
-  timeout         = 900            # 15m to wait for pods to become Ready
-  wait            = true
+  atomic           = true
+  cleanup_on_fail  = true
+  timeout          = 900
+  wait             = true
 
   set {
     name  = "image.repository"
@@ -21,19 +20,42 @@ resource "helm_release" "staging" {
     name  = "serviceAccount.name"
     value = "inu-dining-ksa"
   }
-    depends_on = [kubernetes_secret.db_secret_staging]
 
+  # Use values to completely override the ingress section
+  values = [
+    yamlencode({
+      ingress = {
+        enabled = true
+        annotations = {
+          "networking.gke.io/managed-certificates" = google_compute_managed_ssl_certificate.staging_cert.name
+        }
+        hosts = [
+          {
+            host = var.staging_hostname
+            paths = [
+              {
+                path = "/"
+                pathType = "ImplementationSpecific"
+              }
+            ]
+          }
+        ]
+      }
+    })
+  ]
+
+  depends_on = [kubernetes_secret.db_secret_staging, google_compute_managed_ssl_certificate.staging_cert]
 }
 
 resource "helm_release" "production" {
   name             = "inu-dining-prod"
-  chart            = "../charts/inu-dining-backend" # Path to new chart
+  chart            = "../charts/inu-dining-backend"
   namespace        = kubernetes_namespace.prod.metadata[0].name
   create_namespace = false
-  atomic          = true           # auto-rollback on failure
-  cleanup_on_fail = true           # remove broken release so name isn’t “stuck”
-  timeout         = 900            # 15m to wait for pods to become Ready
-  wait            = true
+  atomic           = true
+  cleanup_on_fail  = true
+  timeout          = 900
+  wait             = true
 
   set {
     name  = "image.repository"
@@ -48,7 +70,28 @@ resource "helm_release" "production" {
     value = "inu-dining-ksa"
   }
 
-    depends_on = [kubernetes_secret.db_secret_prod]
+  values = [
+    yamlencode({
+      ingress = {
+        enabled = true
+        annotations = {
+          "networking.gke.io/managed-certificates" = google_compute_managed_ssl_certificate.prod_cert.name
+        }
+        hosts = [
+          {
+            host = var.prod_hostname
+            paths = [
+              {
+                path = "/"
+                pathType = "ImplementationSpecific"
+              }
+            ]
+          }
+        ]
+      }
+    })
+  ]
 
-
+  depends_on = [kubernetes_secret.db_secret_prod, google_compute_managed_ssl_certificate.prod_cert]
 }
+
