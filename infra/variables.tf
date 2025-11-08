@@ -78,7 +78,7 @@ variable "staging_hostname" {
 variable "prod_hostname" {
   description = "The hostname for the production environment"
   type        = string
-  default     = "api-prod.inu-dining-app.tk"
+  default     = "api-prod.inu-dining-app.org"
 }
 
 variable "duckdns_token_secret_id" {
