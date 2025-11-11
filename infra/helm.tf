@@ -26,9 +26,9 @@ resource "helm_release" "staging" {
     yamlencode({
       ingress = {
         enabled = true
-        className = "gce"
+        className = "nginx"
         annotations = {
-          "ingress.gcp.kubernetes.io/pre-shared-cert" = google_compute_managed_ssl_certificate.staging_cert.name
+          "networking.gke.io/pre-shared-cert" = google_compute_managed_ssl_certificate.staging_cert.name
         }
         hosts = [
           {
@@ -45,7 +45,7 @@ resource "helm_release" "staging" {
     })
   ]
 
-  depends_on = [kubernetes_secret.db_secret_staging, google_compute_managed_ssl_certificate.staging_cert, kubernetes_ingress_class_v1.gce]
+  depends_on = [kubernetes_secret.db_secret_staging, google_compute_managed_ssl_certificate.staging_cert, helm_release.nginx_ingress]
 }
 
 resource "helm_release" "production" {
@@ -75,9 +75,9 @@ resource "helm_release" "production" {
     yamlencode({
       ingress = {
         enabled = true
-        className = "gce"
+        className = "nginx"
         annotations = {
-          "ingress.gcp.kubernetes.io/pre-shared-cert" = google_compute_managed_ssl_certificate.prod_cert.name
+          "networking.gke.io/pre-shared-cert" = google_compute_managed_ssl_certificate.prod_cert.name
         }
         hosts = [
           {
@@ -94,6 +94,6 @@ resource "helm_release" "production" {
     })
   ]
 
-  depends_on = [kubernetes_secret.db_secret_prod, google_compute_managed_ssl_certificate.prod_cert, kubernetes_ingress_class_v1.gce]
+  depends_on = [kubernetes_secret.db_secret_prod, google_compute_managed_ssl_certificate.prod_cert, helm_release.nginx_ingress]
 }
 
