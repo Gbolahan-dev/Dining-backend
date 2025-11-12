@@ -21,21 +21,26 @@ resource "helm_release" "staging" {
     value = "inu-dining-ksa"
   }
 
-  # Use values to completely override the ingress section
   values = [
     yamlencode({
       ingress = {
-        enabled = true
-        className = "nginx"
+        enabled     = true
+        className   = "nginx"
         annotations = {
-          "networking.gke.io/pre-shared-cert" = google_compute_managed_ssl_certificate.staging_cert.name
+          "cert-manager.io/cluster-issuer" = "letsencrypt-prod"
         }
+        tls = [
+          {
+            secretName = "inu-dining-api-tls"
+            hosts      = [var.staging_hostname]
+          }
+        ]
         hosts = [
           {
             host = var.staging_hostname
             paths = [
               {
-                path = "/"
+                path     = "/"
                 pathType = "ImplementationSpecific"
               }
             ]
@@ -45,7 +50,11 @@ resource "helm_release" "staging" {
     })
   ]
 
-  depends_on = [kubernetes_secret.db_secret_staging, google_compute_managed_ssl_certificate.staging_cert, helm_release.nginx_ingress]
+  depends_on = [
+    kubernetes_secret.db_secret_staging,
+    helm_release.nginx_ingress,
+    kubernetes_manifest.letsencrypt_issuer
+  ]
 }
 
 resource "helm_release" "production" {
@@ -74,17 +83,23 @@ resource "helm_release" "production" {
   values = [
     yamlencode({
       ingress = {
-        enabled = true
-        className = "nginx"
+        enabled     = true
+        className   = "nginx"
         annotations = {
-          "networking.gke.io/pre-shared-cert" = google_compute_managed_ssl_certificate.prod_cert.name
+          "cert-manager.io/cluster-issuer" = "letsencrypt-prod"
         }
+        tls = [
+          {
+            secretName = "api-prod-tls"
+            hosts      = [var.prod_hostname]
+          }
+        ]
         hosts = [
           {
             host = var.prod_hostname
             paths = [
               {
-                path = "/"
+                path     = "/"
                 pathType = "ImplementationSpecific"
               }
             ]
@@ -94,6 +109,9 @@ resource "helm_release" "production" {
     })
   ]
 
-  depends_on = [kubernetes_secret.db_secret_prod, google_compute_managed_ssl_certificate.prod_cert, helm_release.nginx_ingress]
+  depends_on = [
+    kubernetes_secret.db_secret_prod,
+    helm_release.nginx_ingress,
+    kubernetes_manifest.letsencrypt_issuer
+  ]
 }
-
