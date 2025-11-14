@@ -60,3 +60,31 @@ resource "google_compute_global_forwarding_rule" "frontend" {
   ip_address = google_compute_global_address.frontend_ip.address
   project    = var.project_id
 }
+
+# 7. Create a URL map for the HTTP redirect
+resource "google_compute_url_map" "frontend_redirect" {
+  name    = "inu-dining-frontend-redirect-urlmap"
+  project = var.project_id
+
+  default_url_redirect {
+    https_redirect         = true
+    strip_query            = false
+    redirect_response_code = "MOVED_PERMANENTLY_DEFAULT"
+  }
+}
+
+# 8. Create the HTTP proxy for the redirect
+resource "google_compute_target_http_proxy" "frontend_redirect" {
+  name    = "inu-dining-frontend-redirect-proxy"
+  url_map = google_compute_url_map.frontend_redirect.id
+  project = var.project_id
+}
+
+# 9. Create the port 80 "front door" for the redirect
+resource "google_compute_global_forwarding_rule" "frontend_redirect" {
+  name       = "inu-dining-frontend-redirect-fwd-rule"
+  target     = google_compute_target_http_proxy.frontend_redirect.id
+  port_range = "80"
+  ip_address = google_compute_global_address.frontend_ip.address  # Use the SAME static IP
+  project    = var.project_id
+}

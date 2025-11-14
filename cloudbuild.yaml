@@ -27,8 +27,8 @@ steps:
         set -e
         terraform init -input=false
         terraform apply -auto-approve -input=false \
-          -var="image_tag=${SHORT_SHA}" \
-          -target=helm_release.staging
+          -var="image_tag=${SHORT_SHA}" 
+          # -target=helm_release.staging
     waitFor: ["PUSH-IMAGE"]
 
   # STEP 3: placeholder (note: this is NOT a real approval gate)
@@ -56,8 +56,8 @@ steps:
           echo "Deploying to PRODUCTION"
           terraform init -input=false
           terraform apply -auto-approve -input=false \
-            -var="image_tag=${SHORT_SHA}" \
-            -target=helm_release.production
+            -var="image_tag=${SHORT_SHA}" 
+                                         # -target=helm_release.production
           echo ">>> Terraform apply for PRODUCTION GKE complete."
         else
           echo "Skipping prod deploy for _TARGET_ENV=${_TARGET_ENV}"
